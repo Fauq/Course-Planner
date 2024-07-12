@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">   
+    <title>Document</title>
+</head>
+<body>
+    <a href="/users/logout">Logout</a>
+    <h1>Hello <%= user.charAt(0).toUpperCase() + user.slice(1) %></h1>
+    <h2>Select your major</h2>
+    <form action="/users/Dashboard" method="POST">
+        <select name="major" id="major">
+            <option value="EECS" <%= selectedMajor === 'EECS' ? 'selected' : '' %>>Computer Engineering (CE)</option>
+            <option value="CSE" <%= selectedMajor === 'CSE' ? 'selected' : '' %>>Computer Science (CS)</option>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+    <h2>Enter Current Courses</h2>
+    <form action="/users/dashboard/addCourse" method="POST">
+        <div>
+            <input type="text" id="courseId" name="courseId" placeholder="EECS 280">
+        </div>
+        <div>
+            <button type="submit">Add Course</button>
+        </div>
+    </form>
+
+    <h2>Check my courses</h2>
+    <form action="/users/dashboard/checkCourse" method="POST">
+        <div>
+            <button type="submit">Check Courses</button>
+        </div>
+    </form>
+</body>
+</html>
