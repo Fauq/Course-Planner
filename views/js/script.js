@@ -29,8 +29,25 @@ function displayCourses(courses) {
     courses.forEach(course => {
         const courseElement = document.createElement('div');
         courseElement.textContent = `${course.course_code} - ${course.course_name}`;
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = () => removeCourse(course.course_id, courseElement);
+
+
+        courseElement.appendChild(removeButton);
         coursesList.appendChild(courseElement);
     });
 
+}
+
+function removeCourse (courseId, item) {
+    fetch (`/users/dashboard/courses/${courseId}`, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
+        item.remove();
+    });
 }
 

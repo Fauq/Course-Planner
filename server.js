@@ -272,7 +272,7 @@ app.post('/users/dashboard/checkCourse', async (req, res) => {
             return res.status(400).send('No courses in database');
         }
 
-        const result = await pool.query('SELECT course_code, course_name FROM student_courses WHERE student_id = $1',
+        const result = await pool.query('SELECT course_code, course_name, course_id FROM student_courses WHERE student_id = $1',
             [student_id]);
 
         
@@ -282,6 +282,27 @@ app.post('/users/dashboard/checkCourse', async (req, res) => {
         console.error('Error:', err);
         res.status(500).send('Server error');
     }
+});
+
+app.delete('/users/dashboard/courses/:courseId', checkNotAuthenticated, async (req, res) => {
+    const courseId = req.params.courseId;
+    const studentId = 2;  // Replace with the actual student ID, possibly from session/auth
+    console.log('Course ID:', courseId);
+
+    try {
+        const result = await pool.query('DELETE FROM student_courses WHERE student_id = $1 AND course_id = $2 RETURNING *',
+            [studentId, courseId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).send('Course not found');
+        } 
+
+        res.json({ message: 'Course deleted' });
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Server error');
+    }
+
 });
 
 function checkAuthenticated(req, res, next){
