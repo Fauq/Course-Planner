@@ -6,6 +6,7 @@ const session = require('express-session');
 const flash = require('express-flash');
 const passport = require('passport');
 const PORT = process.env.PORT || 4000;
+const path = require('path');
 
 const initializePassport = require('./passportConfig');
 
@@ -13,6 +14,7 @@ initializePassport(passport);
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, 'views')));
 
 app.use(session({
     secret: 'secret',
@@ -204,6 +206,23 @@ async function getCourseNameFromCode(courseCode) {
         throw err;
     }
 }
+
+async function getNumberOfCourses(studentId) {
+    try {
+        // Query the database for the number of courses the student is enrolled in
+        const result = await pool.query('SELECT COUNT(*) FROM student_courses WHERE student_id = $1', [studentId]);
+        if (result.rows.length > 0) {
+            // If a matching course is found, return its ID
+            return result.rows[0].count;
+        } else {
+            // If no matching course is found, return null or handle as needed
+            return null;
+        }
+    } catch (err) {
+        console.error('Error querying the database:', err);
+        throw err;
+    }
+}
 // Updating user courses
 app.post('/users/dashboard/addCourse', async (req, res) => {
     const courseId = await getCourseIdFromCode(req.body.courseId);
@@ -238,6 +257,27 @@ app.post('/users/dashboard/addCourse', async (req, res) => {
         }
   
         res.redirect('/users/dashboard');
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Server error');
+    }
+});
+
+app.post('/users/dashboard/checkCourse', async (req, res) => {
+    student_id = 2; // Replace with the actual student ID, possibly from session/auth
+    numCourses = getNumberOfCourses(student_id);
+
+    try {
+        if (numCourses < 1) { 
+            return res.status(400).send('No courses in database');
+        }
+
+        const result = await pool.query('SELECT course_code, course_name FROM student_courses WHERE student_id = $1',
+            [student_id]);
+
+        
+        res.json({ courses: result.rows });
+        console.log({ courses: result.rows });
     } catch (err) {
         console.error('Error:', err);
         res.status(500).send('Server error');
