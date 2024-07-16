@@ -7,6 +7,7 @@ const flash = require('express-flash');
 const passport = require('passport');
 const PORT = process.env.PORT || 4000;
 const path = require('path');
+const axios = require('axios');
 
 const initializePassport = require('./passportConfig');
 
@@ -115,61 +116,64 @@ app.post('/users/login', passport.authenticate('local', {
     failureFlash: true
 }));
 
-// Updating user major 
+// Updating user dining hall  
 app.post('/users/Dashboard', checkNotAuthenticated, async (req, res) => {
-    const majorCode = req.body.major;
-    const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
+    const hallCode = req.body.diningHall;
+    const studentId = req.user.id;
 
     try {
-        // Map the major code to the major name as per your requirement
-        let majorName = '';
-        switch(majorCode) {
-            case 'EECS':
-                majorName = 'Computer Engineering (CE)';
+        // Map the dining hall code to the dining hall name
+        let hallName = '';
+        switch(hallCode) {
+            case 'NORTH':
+                hallName = 'North Quad';
                 break;
-            case 'CSE':
-                majorName = 'Computer Science (CS)';
+            case 'SOUTH':
+                hallName = 'South Quad';
                 break;
+            case 'BURSLEY':
+                hallName = 'Bursley Hall';
+                break;
+            // Add more case statements for other dining halls
             default:
-                return res.status(400).send('Unknown major code');
-        }
-  
-        // Fetch the corresponding major ID from the database
-        const majorResult = await pool.query('SELECT id FROM majors WHERE name = $1', [majorName]);
-
-        if (majorResult.rows.length === 0) {
-            return res.status(400).send('Major not found');
-        }
-  
-        let majorId = majorResult.rows[0].id;
-
-        // Log variables to ensure proper types
-        console.log('Student ID:', studentId, 'Type:', typeof studentId);
-        console.log('Major ID:', majorId, 'Type:', typeof majorId);
-
-        // Ensure type consistency by converting to integer if necessary
-        majorId = parseInt(majorId);
-        const parsedStudentId = parseInt(studentId);
-  
-        if (isNaN(parsedStudentId) || isNaN(majorId)) {
-            return res.status(400).send('Invalid ID format');
+                return res.status(400).send('Unknown dining hall code');
         }
 
-        // Check if the student already exists in the student_courses table
-        const studentExists = await pool.query('SELECT * FROM student_majors WHERE id = $1', [parsedStudentId]);
-  
-        if (studentExists.rows.length > 0) {
-            // Update the major for the existing student
-            await pool.query('UPDATE student_majors SET major_id = $1, major_name = $2 WHERE id = $3', [majorId, majorName, parsedStudentId]);
-        } else {
-            // Insert new student with the selected major
-            await pool.query('INSERT INTO student_majors (id, major_id, major_name) VALUES ($1, $2, $3)', [parsedStudentId, majorId, majorName]);
-        }
-  
-        res.status(200).redirect(`/users/dashboard?selectedMajor=${majorCode}`);
+        // Log variables to ensure proper values
+        console.log('Student ID:', studentId, 'Selected Dining Hall:', hallName);
+
+        // Redirect to the dashboard with the selected dining hall
+        res.status(200).redirect(`/users/dashboard?selectedHall=${hallCode}`);
     } catch (err) {
         console.error('Error:', err);
         res.status(500).send('Server error');
+    }
+});
+
+app.get('/dining-hall/:hallCode', async (req, res) => { 
+    const hallCode = req.params.hallCode; 
+    let hallName = '';
+    switch(hallCode) {
+        case 'NORTH':
+            hallName = 'North Quad';
+            break;
+        case 'SOUTH':
+            hallName = 'South Quad';
+            break;
+        case 'BURSLEY':
+            hallName = 'Bursley Hall';
+            break;
+        // Add more case statements for other dining halls
+        default:
+            return res.status(400).send('Unknown dining hall code');
+    }
+
+    try {
+        const response = await axios.get(`https://michigandiningapi.com/api/v1/dining_halls/${hallName}`); 
+        res.json = (response.data);
+    } catch(err) {
+        res.status(500).send('Server Error');
+    
     }
 });
 

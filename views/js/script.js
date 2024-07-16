@@ -51,3 +51,33 @@ function removeCourse (courseId, item) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedHall = urlParams.get('selectedHall');
+    const selectedHallName = {
+        'NORTH': 'North Quad',
+        'SOUTH': 'South Quad',
+        'BURSLEY': 'Bursley Hall'
+        // Add more mappings for other dining halls
+    }[selectedHall];
+
+    if (selectedHallName) {
+        document.getElementById('selectedHall').innerText = `Selected Dining Hall: ${selectedHallName}`;
+        fetch(`/dining-hall/${selectedHall}`)
+            .then(response => response.json())
+            .then(data => {
+                const diningHallMenu = document.getElementById('diningHallMenu');
+                diningHallMenu.innerHTML = '';
+                data.menu_items.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.innerText = `${item.name} - ${item.calories} calories`;
+                    diningHallMenu.appendChild(listItem);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching dining hall data:', error);
+            });
+    } else {
+        document.getElementById('selectedHall').innerText = 'No dining hall selected';
+    }
+});

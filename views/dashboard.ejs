@@ -10,32 +10,39 @@
 <body>
     <h1>Hello <%= user.charAt(0).toUpperCase() + user.slice(1) %></h1>
     <a href="/users/logout" id="logout">Logout</a>
-    <h2>Select your major</h2>
+    <h2>Daily calories: 520</h2>
+    <h2>Select your dining hall</h2>
     <form action="/users/Dashboard" method="POST">
-        <select name="major" id="major">
-            <option value="EECS" <%= selectedMajor === 'EECS' ? 'selected' : '' %>>Computer Engineering (CE)</option>
-            <option value="CSE" <%= selectedMajor === 'CSE' ? 'selected' : '' %>>Computer Science (CS)</option>
-        </select>
-        <button type="submit">Submit</button>
+      <select name="diningHall" id="diningHall">
+          <option value="NORTH">North Quad</option>
+          <option value="SOUTH">South Quad</option>
+          <option value="BURSLEY">Bursley Hall</option>
+          <!-- Add more options for other dining halls -->
+      </select>
+      <button type="submit">Submit</button>
     </form>
-    <h2>Enter Courses</h2>
+    <h3 id="selectedHall"></h3>
+    <ul id="diningHallMenu"></ul>
+    <!--
+    <h2>Enter Stocks</h2>
     <form action="/users/dashboard/addCourse" method="POST">
         <div>
-            <input type="text" id="courseId" name="courseId" placeholder="EECS 280">
+            <input type="text" id="courseId" name="courseId" placeholder="S&P 500">
         </div>
         <div>
-            <button type="submit">Add Course</button>
+            <button type="submit">Add Stock</button>
         </div>
     </form>
     <div id="userCourses">
     <h2>My courses</h2>
     <form id="checkCoursesForm" action="/users/dashboard/checkCourse" method="POST">
         <div>
-            <button type="submit">Load Courses</button>
+            <button type="submit">Load Stocks</button>
         </div>
     </form>
 
     <div id="coursesList"></div>
+    -->
     </div>
     <script src="/js/script.js"></script>
 </body>
