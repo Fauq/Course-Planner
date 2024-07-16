@@ -116,9 +116,9 @@ app.post('/users/login', passport.authenticate('local', {
 }));
 
 // Updating user major 
-app.post('/users/Dashboard', async (req, res) => {
+app.post('/users/Dashboard', checkNotAuthenticated, async (req, res) => {
     const majorCode = req.body.major;
-    const studentId = 2;  // Replace with the actual student ID, possibly from session/auth
+    const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
 
     try {
         // Map the major code to the major name as per your requirement
@@ -224,9 +224,9 @@ async function getNumberOfCourses(studentId) {
     }
 }
 // Updating user courses
-app.post('/users/dashboard/addCourse', async (req, res) => {
+app.post('/users/dashboard/addCourse', checkNotAuthenticated, async (req, res) => {
     const courseId = await getCourseIdFromCode(req.body.courseId);
-    const studentId = 2;  // Replace with the actual student ID, possibly from session/auth
+    const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
     const courseCode = req.body.courseId; 
     const courseName = await getCourseNameFromCode(req.body.courseId);
 
@@ -263,8 +263,8 @@ app.post('/users/dashboard/addCourse', async (req, res) => {
     }
 });
 
-app.post('/users/dashboard/checkCourse', async (req, res) => {
-    student_id = 2; // Replace with the actual student ID, possibly from session/auth
+app.post('/users/dashboard/checkCourse', checkNotAuthenticated, async (req, res) => {
+    student_id = req.user.id; // Replace with the actual student ID, possibly from session/auth
     numCourses = getNumberOfCourses(student_id);
 
     try {
@@ -286,7 +286,7 @@ app.post('/users/dashboard/checkCourse', async (req, res) => {
 
 app.delete('/users/dashboard/courses/:courseId', checkNotAuthenticated, async (req, res) => {
     const courseId = req.params.courseId;
-    const studentId = 2;  // Replace with the actual student ID, possibly from session/auth
+    const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
     console.log('Course ID:', courseId);
 
     try {
