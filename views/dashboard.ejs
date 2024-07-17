@@ -12,14 +12,19 @@
     <a href="/users/logout" id="logout">Logout</a>
     <h2>Daily calories: 520</h2>
     <h2>Select your dining hall</h2>
-    <form action="/users/Dashboard" method="POST">
-      <select name="diningHall" id="diningHall">
-          <option value="NORTH">North Quad</option>
-          <option value="SOUTH">South Quad</option>
-          <option value="BURSLEY">Bursley Hall</option>
-          <!-- Add more options for other dining halls -->
-      </select>
-      <button type="submit">Submit</button>
+    <form action="/users/Dashboard" method="POST" id="diningHallForm">
+        <select name="diningHall" id="diningHall">
+            <!-- Options will be populated dynamically -->
+        </select>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date">
+        <label for="meal">Meal:</label>
+        <select name="meal" id="meal">
+            <option value="BREAKFAST">Breakfast</option>
+            <option value="LUNCH">Lunch</option>
+            <option value="DINNER">Dinner</option>
+        </select>
+        <button type="submit">Submit</button>
     </form>
     <h3 id="selectedHall"></h3>
     <ul id="diningHallMenu"></ul>

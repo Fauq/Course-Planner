@@ -8,6 +8,10 @@ const passport = require('passport');
 const PORT = process.env.PORT || 4000;
 const path = require('path');
 const axios = require('axios');
+const bodyParser = require('body-parser');
+
+const diningRoutes = require("./routes/dining");
+const dashboardRoutes = require("./routes/dashboard");
 
 const initializePassport = require('./passportConfig');
 
@@ -15,7 +19,9 @@ initializePassport(passport);
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
-app.use(express.static(path.join(__dirname, 'views')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(session({
     secret: 'secret',
@@ -117,197 +123,139 @@ app.post('/users/login', passport.authenticate('local', {
 }));
 
 // Updating user dining hall  
-app.post('/users/Dashboard', checkNotAuthenticated, async (req, res) => {
-    const hallCode = req.body.diningHall;
-    const studentId = req.user.id;
 
-    try {
-        // Map the dining hall code to the dining hall name
-        let hallName = '';
-        switch(hallCode) {
-            case 'NORTH':
-                hallName = 'North Quad';
-                break;
-            case 'SOUTH':
-                hallName = 'South Quad';
-                break;
-            case 'BURSLEY':
-                hallName = 'Bursley Hall';
-                break;
-            // Add more case statements for other dining halls
-            default:
-                return res.status(400).send('Unknown dining hall code');
-        }
 
-        // Log variables to ensure proper values
-        console.log('Student ID:', studentId, 'Selected Dining Hall:', hallName);
+// async function getCourseIdFromCode(courseCode) {
+//     try {
+//         // Query the database for the course with the matching code
+//         const result = await pool.query('SELECT id FROM courses WHERE code = $1', [courseCode]);
+//         if (result.rows.length > 0) {
+//             // If a matching course is found, return its ID
+//             return result.rows[0].id;
+//         } else {
+//             // If no matching course is found, return null or handle as needed
+//             return null;
+//         }
+//     } catch (err) {
+//         console.error('Error querying the database:', err);
+//         throw err;
+//     }
+// }
 
-        // Redirect to the dashboard with the selected dining hall
-        res.status(200).redirect(`/users/dashboard?selectedHall=${hallCode}`);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Server error');
-    }
-});
+// // async function getCourseNameFromCode(courseCode) {
+// //     try {
+// //         // Query the database for the course with the matching code
+// //         const result = await pool.query('SELECT name FROM courses WHERE code = $1', [courseCode]);
+// //         if (result.rows.length > 0) {
+// //             // If a matching course is found, return its name
+// //             return result.rows[0].name;
+// //         } else {
+// //             // If no matching course is found, return null or handle as needed
+// //             return null;
+// //         }
+// //     } catch (err) {
+// //         console.error('Error querying the database:', err);
+// //         throw err;
+// //     }
+// // }
 
-app.get('/dining-hall/:hallCode', async (req, res) => { 
-    const hallCode = req.params.hallCode; 
-    let hallName = '';
-    switch(hallCode) {
-        case 'NORTH':
-            hallName = 'North Quad';
-            break;
-        case 'SOUTH':
-            hallName = 'South Quad';
-            break;
-        case 'BURSLEY':
-            hallName = 'Bursley Hall';
-            break;
-        // Add more case statements for other dining halls
-        default:
-            return res.status(400).send('Unknown dining hall code');
-    }
-
-    try {
-        const response = await axios.get(`https://michigandiningapi.com/api/v1/dining_halls/${hallName}`); 
-        res.json = (response.data);
-    } catch(err) {
-        res.status(500).send('Server Error');
-    
-    }
-});
-
-async function getCourseIdFromCode(courseCode) {
-    try {
-        // Query the database for the course with the matching code
-        const result = await pool.query('SELECT id FROM courses WHERE code = $1', [courseCode]);
-        if (result.rows.length > 0) {
-            // If a matching course is found, return its ID
-            return result.rows[0].id;
-        } else {
-            // If no matching course is found, return null or handle as needed
-            return null;
-        }
-    } catch (err) {
-        console.error('Error querying the database:', err);
-        throw err;
-    }
-}
-
-async function getCourseNameFromCode(courseCode) {
-    try {
-        // Query the database for the course with the matching code
-        const result = await pool.query('SELECT name FROM courses WHERE code = $1', [courseCode]);
-        if (result.rows.length > 0) {
-            // If a matching course is found, return its name
-            return result.rows[0].name;
-        } else {
-            // If no matching course is found, return null or handle as needed
-            return null;
-        }
-    } catch (err) {
-        console.error('Error querying the database:', err);
-        throw err;
-    }
-}
-
-async function getNumberOfCourses(studentId) {
-    try {
-        // Query the database for the number of courses the student is enrolled in
-        const result = await pool.query('SELECT COUNT(*) FROM student_courses WHERE student_id = $1', [studentId]);
-        if (result.rows.length > 0) {
-            // If a matching course is found, return its ID
-            return result.rows[0].count;
-        } else {
-            // If no matching course is found, return null or handle as needed
-            return null;
-        }
-    } catch (err) {
-        console.error('Error querying the database:', err);
-        throw err;
-    }
-}
+// // async function getNumberOfCourses(studentId) {
+//     try {
+//         // Query the database for the number of courses the student is enrolled in
+//         const result = await pool.query('SELECT COUNT(*) FROM student_courses WHERE student_id = $1', [studentId]);
+//         if (result.rows.length > 0) {
+//             // If a matching course is found, return its ID
+//             return result.rows[0].count;
+//         } else {
+//             // If no matching course is found, return null or handle as needed
+//             return null;
+//         }
+//     } catch (err) {
+//         console.error('Error querying the database:', err);
+//         throw err;
+//     }
+// }
 // Updating user courses
-app.post('/users/dashboard/addCourse', checkNotAuthenticated, async (req, res) => {
-    const courseId = await getCourseIdFromCode(req.body.courseId);
-    const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
-    const courseCode = req.body.courseId; 
-    const courseName = await getCourseNameFromCode(req.body.courseId);
+// app.post('/users/dashboard/addCourse', checkNotAuthenticated, async (req, res) => {
+//     const courseId = await getCourseIdFromCode(req.body.courseId);
+//     const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
+//     const courseCode = req.body.courseId; 
+//     const courseName = await getCourseNameFromCode(req.body.courseId);
 
     
-    try {
-        // Log variables to ensure proper types
-        console.log('Student ID:', studentId, 'Type:', typeof studentId);
-        console.log('Course ID:', courseId, 'Type:', typeof courseId);
+//     try {
+//         // Log variables to ensure proper types
+//         console.log('Student ID:', studentId, 'Type:', typeof studentId);
+//         console.log('Course ID:', courseId, 'Type:', typeof courseId);
 
-        // Ensure type consistency by converting to integer if necessary
-        const parsedCourseId = parseInt(courseId);
-        const parsedStudentId = parseInt(studentId);
+//         // Ensure type consistency by converting to integer if necessary
+//         const parsedCourseId = parseInt(courseId);
+//         const parsedStudentId = parseInt(studentId);
         
   
-        if (isNaN(parsedStudentId) || isNaN(parsedCourseId)) {
-            return res.status(400).send('Invalid ID format');
-        }
+//         if (isNaN(parsedStudentId) || isNaN(parsedCourseId)) {
+//             return res.status(400).send('Invalid ID format');
+//         }
 
-        // Check if the course already exists in the student_courses table
-        const courseExists = await pool.query('SELECT * FROM student_courses WHERE student_id = $1 AND course_id = $2', [parsedStudentId, parsedCourseId]);
+//         // Check if the course already exists in the student_courses table
+//         const courseExists = await pool.query('SELECT * FROM student_courses WHERE student_id = $1 AND course_id = $2', [parsedStudentId, parsedCourseId]);
         
 
-        if (courseExists.rows.length > 0) {
-            return res.status(400).send('Course already added');
-        } else {
-            // Insert new course for the student
-            await pool.query('INSERT INTO student_courses (student_id, course_id, course_code, course_name) VALUES ($1, $2, $3, $4)', [parsedStudentId, parsedCourseId, courseCode, courseName]);
-        }
+//         if (courseExists.rows.length > 0) {
+//             return res.status(400).send('Course already added');
+//         } else {
+//             // Insert new course for the student
+//             await pool.query('INSERT INTO student_courses (student_id, course_id, course_code, course_name) VALUES ($1, $2, $3, $4)', [parsedStudentId, parsedCourseId, courseCode, courseName]);
+//         }
   
-        res.redirect('/users/dashboard');
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Server error');
-    }
-});
+//         res.redirect('/users/dashboard');
+//     } catch (err) {
+//         console.error('Error:', err);
+//         res.status(500).send('Server error');
+//     }
+// });
 
-app.post('/users/dashboard/checkCourse', checkNotAuthenticated, async (req, res) => {
-    student_id = req.user.id; // Replace with the actual student ID, possibly from session/auth
-    numCourses = getNumberOfCourses(student_id);
+// app.post('/users/dashboard/checkCourse', checkNotAuthenticated, async (req, res) => {
+//     student_id = req.user.id; // Replace with the actual student ID, possibly from session/auth
+//     numCourses = getNumberOfCourses(student_id);
 
-    try {
-        if (numCourses < 1) { 
-            return res.status(400).send('No courses in database');
-        }
+//     try {
+//         if (numCourses < 1) { 
+//             return res.status(400).send('No courses in database');
+//         }
 
-        const result = await pool.query('SELECT course_code, course_name, course_id FROM student_courses WHERE student_id = $1',
-            [student_id]);
+//         const result = await pool.query('SELECT course_code, course_name, course_id FROM student_courses WHERE student_id = $1',
+//             [student_id]);
 
         
-        res.json({ courses: result.rows });
-        console.log({ courses: result.rows });
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Server error');
-    }
-});
+//         res.json({ courses: result.rows });
+//         console.log({ courses: result.rows });
+//     } catch (err) {
+//         console.error('Error:', err);
+//         res.status(500).send('Server error');
+//     }
+// });
 
-app.delete('/users/dashboard/courses/:courseId', checkNotAuthenticated, async (req, res) => {
-    const courseId = req.params.courseId;
-    const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
-    console.log('Course ID:', courseId);
+// app.delete('/users/dashboard/courses/:courseId', checkNotAuthenticated, async (req, res) => {
+//     const courseId = req.params.courseId;
+//     const studentId = req.user.id;  // Replace with the actual student ID, possibly from session/auth
+//     console.log('Course ID:', courseId);
 
-    try {
-        const result = await pool.query('DELETE FROM student_courses WHERE student_id = $1 AND course_id = $2 RETURNING *',
-            [studentId, courseId]);
+//     try {
+//         const result = await pool.query('DELETE FROM student_courses WHERE student_id = $1 AND course_id = $2 RETURNING *',
+//             [studentId, courseId]);
 
-        if (result.rows.length === 0) {
-            return res.status(404).send('Course not found');
-        } 
+//         if (result.rows.length === 0) {
+//             return res.status(404).send('Course not found');
+//         } 
 
-        res.json({ message: 'Course deleted' });
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Server error');
-    }
+//         res.json({ message: 'Course deleted' });
+//     } catch (err) {
+//         console.error('Error:', err);
+//         res.status(500).send('Server error');
+//     }
 
-});
+// });
 
 function checkAuthenticated(req, res, next){
     if(req.isAuthenticated()){
@@ -322,6 +270,9 @@ function checkNotAuthenticated(req, res, next){
     }
     res.redirect('/users/login');
 }
+
+app.use('/dining', diningRoutes);
+app.use('/users', dashboardRoutes);
 
 app.listen(PORT, ()=> {
     console.log('Server running on port ${PORT}');
