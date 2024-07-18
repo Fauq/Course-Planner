@@ -11,7 +11,7 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 
 const diningRoutes = require("./routes/dining");
-const dashboardRoutes = require("./routes/dashboard");
+const dashboardRoute = require("./routes/dashboard");
 
 const initializePassport = require('./passportConfig');
 
@@ -270,9 +270,24 @@ function checkNotAuthenticated(req, res, next){
     }
     res.redirect('/users/login');
 }
+app.post('/users/dashboard/diningHall', async (req, res) => {
+    let {diningHall, date, meal} = req.body;
 
-app.use('/dining', diningRoutes);
-app.use('/users', dashboardRoutes);
+    console.log(diningHall, date, meal);
+    try {
+        const response = await axios.get(`https://michigan-dining-api.tendiesti.me/v1/menus`, {
+            params: {
+                date,
+                diningHall,
+                meal
+            }
+        });
+        console.log("Success loading menu data");
+    } catch (error) {
+        console.log("Error fetching menu data: ", error);
+        res.status(500).send("Server Error");
+    }
+});
 
 app.listen(PORT, ()=> {
     console.log('Server running on port ${PORT}');
