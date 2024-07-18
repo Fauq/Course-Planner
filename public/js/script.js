@@ -40,6 +40,8 @@ async function fetchMenu() {
     const meal = document.getElementById('meal').value;
     let newMeal = meal.charAt(0).toUpperCase() + meal.slice(1).toLowerCase();
 
+    document.getElementById('diningHallMenu').innerHTML = '';
+
     fetch('https://michigan-dining-api.tendiesti.me/v1/items')
     .then(response => response.json())
     .then(data => {
@@ -53,7 +55,7 @@ async function fetchMenu() {
                     if(diningHallMatch.name === diningHall && diningHallMatch.mealTimesArray.forEach(mealTime => {
                         if(mealTime.date === date && mealTime.mealNames[0] === meal) {
 
-                            document.getElementById('selectedHall').innerText = diningHall + ' ' + meal + ' Menu';
+                            document.getElementById('selectedHall').innerText = diningHall + ' ' + newMeal + ' Menu';
                             var menuItemDiv = document.createElement('div'); // Create a div to hold both name and calories
 
                             var menuItemName = document.createElement('p'); // Use p for the item name
@@ -93,7 +95,7 @@ function getFoodNutrition(name, date, meal) {
             let calories = 0;
             const foodArr = data.foods;
             foodArr.forEach(food => {
-                calories += food.menuItem.itemSizes[0].nutritionalInfo[0].value; // Assuming you want to sum calories
+                calories = food.menuItem.itemSizes[0].nutritionalInfo[0].value; // Assuming you want to sum calories
             });
             return calories; // Resolve the promise with calories
         })
