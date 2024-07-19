@@ -55,22 +55,35 @@ async function fetchMenu() {
                     if(diningHallMatch.name === diningHall && diningHallMatch.mealTimesArray.forEach(mealTime => {
                         if(mealTime.date === date && mealTime.mealNames[0] === meal) {
 
-                            document.getElementById('selectedHall').innerText = diningHall + ' ' + newMeal + ' Menu';
-                            var menuItemDiv = document.createElement('div'); // Create a div to hold both name and calories
+                            document.getElementById('selectedHall').innerText = `${diningHall} \n${newMeal} Menu`;
 
-                            var menuItemName = document.createElement('p'); // Use p for the item name
-                            menuItemName.innerText = item.name;
-                            menuItemDiv.appendChild(menuItemName); // Append the name to the div
+                                        const buttonWrapper = document.createElement('div');
+                                        buttonWrapper.className = 'button-wrapper';
 
-                            document.getElementById('diningHallMenu').appendChild(menuItemDiv); // Append the div to the menu
+                                        const menuItemName = document.createElement('div');
+                                        menuItemName.className = 'menu-item-name';
+                                        menuItemName.innerText = item.name;
+                                        buttonWrapper.appendChild(menuItemName);
 
-                            getFoodNutrition(item.name.toLowerCase(), date, meal)
-                            .then(calories => {
-                                var caloriesInfo = document.createElement('p'); // Use another p for calories
-                                caloriesInfo.textContent = `Calories: ${calories}`;
-                                menuItemDiv.appendChild(caloriesInfo); // Append calories info below the item name
-                            })
-                            .catch(error => console.error('Error fetching nutrition:', error));
+                                        const nutritionInfoWrapper = document.createElement('div');
+                                        nutritionInfoWrapper.className = 'nutrition-info-wrapper';
+
+                                        const caloriesDiv = document.createElement('div');
+                                        const proteinDiv = document.createElement('div');
+
+                                        nutritionInfoWrapper.appendChild(caloriesDiv);
+                                        nutritionInfoWrapper.appendChild(proteinDiv);
+
+                                        buttonWrapper.appendChild(nutritionInfoWrapper);
+
+                                        document.getElementById('diningHallMenu').appendChild(buttonWrapper);
+
+                                        getFoodNutrition(item.name.toLowerCase(), date, meal)
+                                        .then(nutrition => {
+                                            caloriesDiv.textContent = `Calories: ${nutrition.calories}`;
+                                            proteinDiv.textContent = `Protein: ${nutrition.protein}g`;
+                                        })
+                                        .catch(error => console.error('Error fetching nutrition:', error));
                         }
                     })
                     );
@@ -93,11 +106,13 @@ function getFoodNutrition(name, date, meal) {
         .then(response => response.json())
         .then(data => {
             let calories = 0;
+            let protein = 0;
             const foodArr = data.foods;
             foodArr.forEach(food => {
-                calories = food.menuItem.itemSizes[0].nutritionalInfo[0].value; // Assuming you want to sum calories
+                calories = food.menuItem.itemSizes[0].nutritionalInfo[0].value; 
+                protein = food.menuItem.itemSizes[0].nutritionalInfo[9].value;
             });
-            return calories; // Resolve the promise with calories
+            return {calories, protein}; // Resolve the promise with calories
         })
         .catch(error => {
             console.error('Error fetching food nutrition:', error);
