@@ -57,26 +57,33 @@ async function fetchMenu() {
 
                             document.getElementById('selectedHall').innerText = `${diningHall} \n${newMeal} Menu`;
 
-                                        const buttonWrapper = document.createElement('div');
-                                        buttonWrapper.className = 'button-wrapper';
+                            const buttonWrapper = document.createElement('div');
+                            buttonWrapper.className = 'button-wrapper';
 
-                                        const menuItemName = document.createElement('div');
-                                        menuItemName.className = 'menu-item-name';
-                                        menuItemName.innerText = item.name;
-                                        buttonWrapper.appendChild(menuItemName);
+                            const menuItemName = document.createElement('div');
+                            menuItemName.className = 'menu-item-name';
+                            menuItemName.innerText = item.name;
+                            buttonWrapper.appendChild(menuItemName);
 
-                                        const nutritionInfoWrapper = document.createElement('div');
-                                        nutritionInfoWrapper.className = 'nutrition-info-wrapper';
+                            const nutritionInfoWrapper = document.createElement('div');
+                            nutritionInfoWrapper.className = 'nutrition-info-wrapper';
 
-                                        const caloriesDiv = document.createElement('div');
-                                        const proteinDiv = document.createElement('div');
+                            const caloriesDiv = document.createElement('div');
+                            const proteinDiv = document.createElement('div');
 
-                                        nutritionInfoWrapper.appendChild(caloriesDiv);
-                                        nutritionInfoWrapper.appendChild(proteinDiv);
+                            nutritionInfoWrapper.appendChild(caloriesDiv);
+                            nutritionInfoWrapper.appendChild(proteinDiv);
 
-                                        buttonWrapper.appendChild(nutritionInfoWrapper);
+                            buttonWrapper.appendChild(nutritionInfoWrapper);
 
-                                        document.getElementById('diningHallMenu').appendChild(buttonWrapper);
+                            // Add the log button
+                            const logButton = document.createElement('button');
+                            logButton.className = 'log-button';
+                            logButton.innerText = '+';
+                            logButton.addEventListener('click', () => logCalories(item, caloriesDiv.innerText));
+                            buttonWrapper.appendChild(logButton);
+
+                            document.getElementById('diningHallMenu').appendChild(buttonWrapper);
 
                                         getFoodNutrition(item.name.toLowerCase(), date, meal)
                                         .then(nutrition => {
@@ -118,4 +125,12 @@ function getFoodNutrition(name, date, meal) {
             console.error('Error fetching food nutrition:', error);
             throw error; // Re-throw the error to be catchable by the caller
         });
+}
+
+function logCalories(item, calories) {
+    const log = {
+        name: item.name,
+        calories: calories
+    };
+    console.log('Logging:', log);
 }
