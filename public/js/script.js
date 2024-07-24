@@ -80,7 +80,7 @@ async function fetchMenu() {
                             const logButton = document.createElement('button');
                             logButton.className = 'log-button';
                             logButton.innerText = '+';
-                            logButton.addEventListener('click', () => logFood(item, caloriesDiv.innerText));
+                            logButton.addEventListener('click', (event) => openLogModal(event, item, date, newMeal));
                             buttonWrapper.appendChild(logButton);
 
                             document.getElementById('diningHallMenu').appendChild(buttonWrapper);
@@ -89,6 +89,9 @@ async function fetchMenu() {
                                         .then(nutrition => {
                                             caloriesDiv.textContent = `Calories: ${nutrition.calories}`;
                                             proteinDiv.textContent = `Protein: ${nutrition.protein}g`;
+                                            logButton.dataset.calories = nutrition.calories; // Storing calories for logging
+                                            logButton.dataset.protein = nutrition.protein;  // Storing protein for logging
+                                            logButton.dataset.nutrition = JSON.stringify(nutrition);
                                         })
                                         .catch(error => console.error('Error fetching nutrition:', error));
                         }
@@ -133,4 +136,26 @@ function logFood(item, calories) {
         calories: calories
     };
     console.log('Logging:', log);
+}
+
+function openLogModal(event, item, date, meal) {
+    const nutrition = JSON.parse(event.target.dataset.nutrition);
+
+    document.getElementById('modalFoodName').innerText = `Name: ${item.name}`;
+    document.getElementById('modalFoodCalories').innerText = `Calories: ${nutrition.calories}`;
+    document.getElementById('modalFoodProtein').innerText = `Protein: ${nutrition.protein}`;
+    // Add other nutritional info
+    
+    // Store data for logging later
+    document.getElementById('logModal').dataset.item = JSON.stringify(item);
+    document.getElementById('logModal').dataset.date = date;
+    document.getElementById('logModal').dataset.meal = meal;
+    document.getElementById('logModal').dataset.nutrition = event.target.dataset.nutrition;
+    
+    // Display the modal
+    document.getElementById('logModal').style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById('logModal').style.display = "none";
 }
