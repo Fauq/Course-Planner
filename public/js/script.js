@@ -80,7 +80,7 @@ async function fetchMenu() {
                             const logButton = document.createElement('button');
                             logButton.className = 'log-button';
                             logButton.innerText = '+';
-                            logButton.addEventListener('click', () => logCalories(item, caloriesDiv.innerText));
+                            logButton.addEventListener('click', () => logFood(item, caloriesDiv.innerText));
                             buttonWrapper.appendChild(logButton);
 
                             document.getElementById('diningHallMenu').appendChild(buttonWrapper);
@@ -127,7 +127,7 @@ function getFoodNutrition(name, date, meal) {
         });
 }
 
-function logCalories(item, calories) {
+function logFood(item, calories) {
     const log = {
         name: item.name,
         calories: calories
