@@ -11,4 +11,5 @@ const { getMenu } = require('../controllers/diningcontroller');
 
 router.post('/users/dashboard/diningHall', getMenu);
 
+
 module.exports = router;

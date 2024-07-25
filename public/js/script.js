@@ -141,7 +141,7 @@ function logFood(item, calories) {
 function openLogModal(event, item, date, meal) {
     const nutrition = JSON.parse(event.target.dataset.nutrition);
 
-    document.getElementById('modalFoodName').innerText = `Name: ${item.name}`;
+    document.getElementById('modalFoodName').innerText = `${item.name}`;
     document.getElementById('modalFoodCalories').innerText = `Calories: ${nutrition.calories}`;
     document.getElementById('modalFoodProtein').innerText = `Protein: ${nutrition.protein}`;
     // Add other nutritional info
